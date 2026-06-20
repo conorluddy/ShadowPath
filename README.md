@@ -19,7 +19,7 @@ Open `index.html` in any modern browser.
 For GitHub Pages, publish the repo from the `main` branch root and visit:
 
 ```text
-https://conorluddy.github.io/shadowpath/
+https://conorluddy.github.io/ShadowPath/
 ```
 
 ## Local Development
