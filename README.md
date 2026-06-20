@@ -1,8 +1,11 @@
+
 # ShadowPath
 
 ShadowPath is a tiny browser tool for turning simple black-and-white silhouette images into SVG paths.
 
 It runs entirely in the browser: drop in an image, adjust the trace controls, then copy or download the generated SVG.
+
+<img width="1512" height="830" alt="Screenshot 2026-06-20 at 20 16 24" src="https://github.com/user-attachments/assets/7010b964-3604-4f66-bfa4-fe480ddbe7bc" />
 
 ## Features
 
