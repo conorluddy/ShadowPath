@@ -279,6 +279,30 @@ input[type="range"] {
   text-transform: uppercase;
 }
 
+.plugin-group legend .group-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.group-toggle input {
+  inline-size: 15px;
+  block-size: 15px;
+  accent-color: var(--accent);
+}
+
+.plugin-select {
+  width: 100%;
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--ink);
+  accent-color: var(--accent);
+}
+
 .toggle {
   min-height: 32px;
   display: flex;
@@ -292,6 +316,15 @@ input[type="range"] {
   inline-size: 17px;
   block-size: 17px;
   accent-color: var(--accent);
+}
+
+.control-group input:disabled,
+.toggle input:disabled {
+  opacity: 0.4;
+}
+
+.plugin-group:has(.group-toggle input:not(:checked)) .control-group label {
+  opacity: 0.5;
 }
 
 .stats {
