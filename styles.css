@@ -259,16 +259,19 @@ button:disabled {
   letter-spacing: 1.2px;
 }
 
-/* Draggable process groups: a grab affordance plus drag/drop feedback. */
-.plugin-group.draggable {
-  cursor: grab;
-}
-
-.plugin-group.draggable legend::before {
-  content: "⠿";
+/* Draggable process groups: only the grip handle is grabbable, so the sliders
+   and enable checkbox inside the group keep working. */
+.drag-handle {
+  display: inline-block;
   margin-right: 8px;
   color: var(--faint);
   cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
 }
 
 .plugin-group.dragging {

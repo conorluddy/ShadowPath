@@ -70,7 +70,6 @@ export function renderControls(container, { registry, definition, state, values,
   function toggleGroup(kind, plugin, index) {
     const enabled = state[kind].enabled[plugin.id] !== false;
     const group = makeGroup(plugin.label);
-    makeReorderable(group, kind, index);
 
     const legend = group.querySelector("legend");
     legend.textContent = "";
@@ -90,15 +89,32 @@ export function renderControls(container, { registry, definition, state, values,
     });
 
     appendParams(group, plugin, !enabled);
+    makeReorderable(group, legend, kind, index);
     return group;
   }
 
   // Native HTML5 drag-and-drop so a process group can be dragged to a new slot
-  // in the chain. On drop we reorder state[kind].order and re-render; the runner
-  // picks up the new order on the next trace.
-  function makeReorderable(group, kind, index) {
-    group.draggable = true;
+  // in the chain. Only the grip handle arms dragging — pointerdown anywhere else
+  // (sliders, the enable checkbox) leaves the group undraggable, so those
+  // controls keep working. On drop we reorder state[kind].order and re-render;
+  // the runner picks up the new order on the next trace.
+  function makeReorderable(group, legend, kind, index) {
     group.classList.add("draggable");
+
+    const handle = document.createElement("span");
+    handle.className = "drag-handle";
+    handle.textContent = "⠿";
+    handle.setAttribute("aria-hidden", "true");
+    legend.insertBefore(handle, legend.firstChild);
+
+    // Arm dragging only while the press began on the handle; disarm once the
+    // gesture ends so a later press elsewhere can't start a drag.
+    handle.addEventListener("pointerdown", () => {
+      group.draggable = true;
+    });
+    const disarm = () => {
+      group.draggable = false;
+    };
 
     group.addEventListener("dragstart", (event) => {
       dragIndex = index;
@@ -107,7 +123,11 @@ export function renderControls(container, { registry, definition, state, values,
     });
     group.addEventListener("dragend", () => {
       group.classList.remove("dragging");
+      disarm();
     });
+    // A press that never became a drag (e.g. a plain click on the handle) must
+    // still clear the armed state.
+    group.addEventListener("pointerup", disarm);
     group.addEventListener("dragover", (event) => {
       event.preventDefault();
       event.dataTransfer.dropEffect = "move";
