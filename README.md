@@ -47,11 +47,17 @@ src/
 test/          Node behavior tests
 ```
 
-Run the tests with Node (no dependencies to install):
+Testing is a first-class concern: every module and plugin is tested
+independently with no test dependencies. Run the specs with Node:
 
 ```text
-npm test
+npm test            # run once
+npm run test:watch  # TDD loop
+npm run test:coverage
 ```
+
+See [TESTING.md](TESTING.md) for the spec-driven workflow and how to add a
+plugin test-first.
 
 ## Architecture
 

@@ -4,6 +4,7 @@
 // automatically — no HTML edits required.
 
 import { defaultParams } from "../shadowpath.js";
+import { formatParamValue } from "./format.js";
 
 /**
  * @param {HTMLElement} container
@@ -56,7 +57,7 @@ function buildRange(pluginId, spec, values, onChange) {
   text.textContent = spec.label;
   const out = document.createElement("output");
   out.htmlFor = id;
-  out.value = formatValue(spec, spec.default);
+  out.value = formatParamValue(spec, spec.default);
   label.append(text, out);
 
   const input = document.createElement("input");
@@ -70,7 +71,7 @@ function buildRange(pluginId, spec, values, onChange) {
   input.addEventListener("input", () => {
     const value = Number(input.value);
     values[pluginId][spec.name] = value;
-    out.value = formatValue(spec, value);
+    out.value = formatParamValue(spec, value);
     onChange();
   });
 
@@ -96,12 +97,4 @@ function buildBoolean(pluginId, spec, values, onChange) {
 
   wrap.append(input, text);
   return wrap;
-}
-
-function formatValue(spec, value) {
-  const step = spec.step ?? 1;
-  if (!Number.isInteger(step)) {
-    return Number(value).toFixed(2).replace(/\.00$/, ".0");
-  }
-  return String(value);
 }
