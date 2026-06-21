@@ -54,10 +54,11 @@
  * so a new plugin's knobs appear with no HTML changes.
  * @property {string} name
  * @property {string} label
- * @property {"range"|"boolean"} type
+ * @property {"range"|"boolean"|"select"} type
  * @property {number} [min]
  * @property {number} [max]
  * @property {number} [step]
+ * @property {{ value: string, label: string }[]} [options] Choices for "select".
  * @property {*} default
  */
 

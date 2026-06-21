@@ -1,8 +1,19 @@
 // Export stage: serialize all contours into a single SVG <path>. Inner loops
 // wind opposite to outer ones, so fill-rule="evenodd" keeps holes transparent.
 
+import { computeViewBox } from "../../geometry/viewport.js";
+import { CANVAS_PARAMS } from "./canvas-params.js";
+
 function roundCoord(value) {
   return Number(value.toFixed(2)).toString();
+}
+
+function viewBoxAttr(contours, params) {
+  const { x, y, width, height } = computeViewBox(contours, {
+    mode: params.canvas,
+    padding: params.padding
+  });
+  return [x, y, width, height].map(roundCoord).join(" ");
 }
 
 function pathToD(points) {
@@ -21,12 +32,12 @@ export const svgPath = {
   kind: "export",
   label: "SVG Path",
   description: "Single even-odd path that preserves holes.",
-  params: [],
-  run(contours) {
-    const { paths, width, height } = contours;
+  params: CANVAS_PARAMS,
+  run(contours, params) {
+    const { paths } = contours;
     const d = paths.map(pathToD).join(" ");
     const text = [
-      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" role="img">`,
+      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBoxAttr(contours, params)}" role="img">`,
       `  <path d="${d}" fill="#000" fill-rule="evenodd"/>`,
       "</svg>"
     ].join("\n");
