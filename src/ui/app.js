@@ -36,6 +36,9 @@ function initializeApp() {
   const overlayControl = document.querySelector("#overlayControl");
   const overlayRange = document.querySelector("#overlayRange");
   const overlayValue = document.querySelector("#overlayValue");
+  const scaleControl = document.querySelector("#scaleControl");
+  const scaleRange = document.querySelector("#scaleRange");
+  const scaleValue = document.querySelector("#scaleValue");
   const overlayCanvas = document.querySelector("#overlayCanvas");
   const overlayContext = overlayCanvas.getContext("2d");
   const overlayVector = document.querySelector("#overlayVector");
@@ -43,6 +46,7 @@ function initializeApp() {
   function selectView(view) {
     previewStage.dataset.view = view;
     overlayControl.hidden = view !== "overlay";
+    scaleControl.hidden = view !== "vector";
     for (const tab of viewTabs) {
       const active = tab.dataset.view === view;
       tab.classList.toggle("is-active", active);
@@ -59,6 +63,13 @@ function initializeApp() {
     overlayValue.textContent = `${overlayRange.value}%`;
   });
   overlayCanvas.style.opacity = String(Number(overlayRange.value) / 100);
+
+  function applyPreviewScale() {
+    vectorSolo.style.setProperty("--preview-scale", String(Number(scaleRange.value) / 100));
+    scaleValue.textContent = `${scaleRange.value}%`;
+  }
+  scaleRange.addEventListener("input", applyPreviewScale);
+  applyPreviewScale();
 
   let imageLoaded = false;
   let latestOutput = null;

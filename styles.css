@@ -452,13 +452,15 @@ input[type="range"]::-moz-range-thumb {
   gap: 20px;
 }
 
-.overlay-control {
+.overlay-control,
+.scale-control {
   display: flex;
   align-items: center;
   gap: 11px;
 }
 
-.overlay-control[hidden] {
+.overlay-control[hidden],
+.scale-control[hidden] {
   display: none;
 }
 
@@ -536,6 +538,13 @@ input[type="range"]::-moz-range-thumb {
 .svg-frame > svg {
   background: var(--panel);
   border-radius: 12px;
+}
+
+/* The Vector view scales the SVG down to preview small render sizes. The factor
+   is set on the container so it survives the SVG being re-rendered each trace. */
+.vector-solo svg {
+  max-width: calc(88% * var(--preview-scale, 1));
+  max-height: calc(100% * var(--preview-scale, 1));
 }
 
 .vector-solo {
