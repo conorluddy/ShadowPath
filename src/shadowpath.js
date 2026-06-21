@@ -10,8 +10,11 @@ import { edgeTrace } from "./plugins/trace/edge-trace.js";
 import { simplify } from "./plugins/process/simplify.js";
 import { smooth } from "./plugins/process/smooth.js";
 import { svgPath } from "./plugins/export/svg-path.js";
+import { svgCurve } from "./plugins/export/svg-curve.js";
 
-export const builtinPlugins = [thresholdMask, edgeTrace, simplify, smooth, svgPath];
+import { PIPELINE_DEFINITION, defaultPipelineState, resolveConfig } from "./core/compose.js";
+
+export const builtinPlugins = [thresholdMask, edgeTrace, simplify, smooth, svgPath, svgCurve];
 
 // The default wiring reproduces the original v0.0.1 tracer exactly:
 // threshold -> edge trace -> simplify -> smooth -> SVG path.
@@ -32,3 +35,4 @@ export function createDefaultRegistry() {
 }
 
 export { runPipeline, activePlugins, defaultParams };
+export { PIPELINE_DEFINITION, defaultPipelineState, resolveConfig };

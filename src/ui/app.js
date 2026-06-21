@@ -5,14 +5,17 @@
 import {
   createDefaultRegistry,
   runPipeline,
-  activePlugins,
-  DEFAULT_PIPELINE
+  PIPELINE_DEFINITION,
+  defaultPipelineState,
+  resolveConfig
 } from "../shadowpath.js";
 import { renderControls } from "./controls.js";
 
 function initializeApp() {
   const registry = createDefaultRegistry();
-  const config = DEFAULT_PIPELINE;
+  const definition = PIPELINE_DEFINITION;
+  const state = defaultPipelineState(definition);
+  const values = {};
 
   const fileInput = document.querySelector("#fileInput");
   const dropzone = document.querySelector("#dropzone");
@@ -27,12 +30,12 @@ function initializeApp() {
   const context = sourceCanvas.getContext("2d", { willReadFrequently: true });
 
   let imageLoaded = false;
-  let latestText = "";
+  let latestOutput = null;
   let latestObjectUrl = "";
   let scheduled = false;
 
-  // Generate the control panel from the active plugins' param schemas.
-  const { values } = renderControls(controlsHost, activePlugins(registry, config), scheduleTrace);
+  // Generate the control panel from the pipeline definition and live state.
+  renderControls(controlsHost, { registry, definition, state, values, onChange: scheduleTrace });
 
   function clearVector() {
     svgPreview.innerHTML =
@@ -40,7 +43,7 @@ function initializeApp() {
     svgOutput.value = "";
     copyButton.disabled = true;
     downloadButton.disabled = true;
-    latestText = "";
+    latestOutput = null;
   }
 
   function scheduleTrace() {
@@ -56,8 +59,9 @@ function initializeApp() {
 
   function traceCurrentImage() {
     const imageData = context.getImageData(0, 0, sourceCanvas.width, sourceCanvas.height);
+    const config = resolveConfig(definition, state);
     const { output, contours, pointCount } = runPipeline(imageData, config, registry, values);
-    latestText = output.text;
+    latestOutput = output;
 
     svgPreview.innerHTML = `${output.text}<span class="preview-label">Vector</span>`;
     svgOutput.value = output.text;
@@ -118,11 +122,11 @@ function initializeApp() {
   });
 
   copyButton.addEventListener("click", async () => {
-    if (!latestText) {
+    if (!latestOutput) {
       return;
     }
     try {
-      await navigator.clipboard.writeText(latestText);
+      await navigator.clipboard.writeText(latestOutput.text);
     } catch {
       svgOutput.select();
       document.execCommand("copy");
@@ -130,17 +134,17 @@ function initializeApp() {
   });
 
   downloadButton.addEventListener("click", () => {
-    if (!latestText) {
+    if (!latestOutput) {
       return;
     }
     if (latestObjectUrl) {
       URL.revokeObjectURL(latestObjectUrl);
     }
-    const blob = new Blob([latestText], { type: "image/svg+xml" });
+    const blob = new Blob([latestOutput.text], { type: latestOutput.mime });
     latestObjectUrl = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = latestObjectUrl;
-    link.download = "shadowpath.svg";
+    link.download = latestOutput.filename;
     link.click();
   });
 

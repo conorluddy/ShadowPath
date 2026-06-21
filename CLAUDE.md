@@ -29,8 +29,9 @@ ImageData  ->  Mask  ->  Contours  ->  Contours  ->  ExportResult
             mask       trace        process[]      export
 ```
 
-- `src/core/` — `registry.js`, `pipeline.js`, `types.js` (the IR). This is the
-  closed-for-modification core.
+- `src/core/` — `registry.js`, `pipeline.js`, `compose.js` (definition + state
+  -> runtime config), `types.js` (the IR). This is the closed-for-modification
+  core.
 - `src/geometry/` — pure contour math. No DOM, no pipeline concerns.
 - `src/plugins/<kind>/<id>.js` — each feature as a plugin.
 - `src/ui/` — schema-driven controls and app wiring (the only DOM-aware code).

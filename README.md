@@ -12,6 +12,8 @@ It runs entirely in the browser: drop in an image, adjust the trace controls, th
 - Converts PNG, JPEG, WebP, and GIF images into SVG markup.
 - Works best with clean black-and-white silhouettes.
 - Includes threshold, simplify, smoothing, and invert controls.
+- Exports straight-line or smooth cubic-Bézier SVG paths.
+- Lets you toggle individual processing steps on and off.
 - Keeps holes and cutouts transparent with SVG `fill-rule="evenodd"`.
 - Has no build step, backend, or runtime dependencies.
 
@@ -73,6 +75,11 @@ Plugins register themselves with the registry and declare their own parameters,
 which the control panel renders automatically — adding a feature means writing a
 plugin, not editing the core or the HTML. Implementations can later be swapped
 (for example a WASM-backed plugin) behind the same stage interface.
+
+Each stage is either single-select (pick the active plugin, e.g. the exporter)
+or a toggle stage where each plugin can be turned on or off independently (the
+processing steps). `src/core/compose.js` turns those choices into a runtime
+config; the control panel is a thin renderer over that state.
 
 ## Contributing
 
