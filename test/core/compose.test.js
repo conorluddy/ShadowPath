@@ -15,9 +15,37 @@ test("defaultPipelineState selects the first option for single stages", () => {
   assert.equal(state.export.selected, "svg-path");
 });
 
-test("defaultPipelineState enables every plugin of a toggle stage", () => {
+test("defaultPipelineState honours a toggle stage's defaultEnabled whitelist", () => {
   const state = defaultPipelineState(PIPELINE_DEFINITION);
-  assert.deepEqual(state.process.enabled, { simplify: true, smooth: true });
+  assert.equal(state.process.enabled.simplify, true);
+  assert.equal(state.process.enabled.smooth, true);
+  for (const id of ["grid-snap", "staircase", "chamfer", "pixel-jitter"]) {
+    assert.equal(state.process.enabled[id], false, `${id} should start off`);
+  }
+});
+
+test("defaultPipelineState enables every option when no whitelist is given", () => {
+  const definition = {
+    mask: { mode: "single", options: ["threshold"] },
+    trace: { mode: "single", options: ["edge-trace"] },
+    process: { mode: "toggle", options: ["a", "b"] },
+    export: { mode: "single", options: ["svg-path"] }
+  };
+  const state = defaultPipelineState(definition);
+  assert.deepEqual(state.process.enabled, { a: true, b: true });
+});
+
+test("the pixel-art plugins are off by default, so the chain is unchanged", () => {
+  const state = defaultPipelineState(PIPELINE_DEFINITION);
+  const config = resolveConfig(PIPELINE_DEFINITION, state);
+  assert.deepEqual(config.process, [{ id: "simplify" }, { id: "smooth" }]);
+});
+
+test("enabling a pixel-art plugin adds it to the chain in declared order", () => {
+  const state = defaultPipelineState(PIPELINE_DEFINITION);
+  state.process.enabled["grid-snap"] = true;
+  const config = resolveConfig(PIPELINE_DEFINITION, state);
+  assert.deepEqual(config.process.map((s) => s.id), ["simplify", "smooth", "grid-snap"]);
 });
 
 test("the default resolved config matches the canonical default pipeline", () => {
@@ -43,6 +71,19 @@ test("the process chain keeps its declared order regardless of toggles", () => {
   const state = defaultPipelineState(PIPELINE_DEFINITION);
   const config = resolveConfig(PIPELINE_DEFINITION, state);
   assert.deepEqual(config.process.map((s) => s.id), ["simplify", "smooth"]);
+});
+
+test("defaultPipelineState seeds the process order from the declared options", () => {
+  const state = defaultPipelineState(PIPELINE_DEFINITION);
+  assert.deepEqual(state.process.order, PIPELINE_DEFINITION.process.options);
+});
+
+test("reordering the state order reorders the resolved chain", () => {
+  const state = defaultPipelineState(PIPELINE_DEFINITION);
+  state.process.order = ["smooth", "simplify", "grid-snap", "staircase", "chamfer", "pixel-jitter"];
+  state.process.enabled["grid-snap"] = true;
+  const config = resolveConfig(PIPELINE_DEFINITION, state);
+  assert.deepEqual(config.process.map((s) => s.id), ["smooth", "simplify", "grid-snap"]);
 });
 
 test("selecting a different exporter changes the export stage", () => {

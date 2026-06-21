@@ -9,12 +9,27 @@ import { thresholdMask } from "./plugins/mask/threshold.js";
 import { edgeTrace } from "./plugins/trace/edge-trace.js";
 import { simplify } from "./plugins/process/simplify.js";
 import { smooth } from "./plugins/process/smooth.js";
+import { gridSnap } from "./plugins/process/grid-snap.js";
+import { staircase } from "./plugins/process/staircase.js";
+import { chamfer } from "./plugins/process/chamfer.js";
+import { pixelJitter } from "./plugins/process/pixel-jitter.js";
 import { svgPath } from "./plugins/export/svg-path.js";
 import { svgCurve } from "./plugins/export/svg-curve.js";
 
 import { PIPELINE_DEFINITION, defaultPipelineState, resolveConfig } from "./core/compose.js";
 
-export const builtinPlugins = [thresholdMask, edgeTrace, simplify, smooth, svgPath, svgCurve];
+export const builtinPlugins = [
+  thresholdMask,
+  edgeTrace,
+  simplify,
+  smooth,
+  gridSnap,
+  staircase,
+  chamfer,
+  pixelJitter,
+  svgPath,
+  svgCurve
+];
 
 // The default wiring reproduces the original v0.0.1 tracer exactly:
 // threshold -> edge trace -> simplify -> smooth -> SVG path.

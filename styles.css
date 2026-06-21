@@ -259,6 +259,29 @@ button:disabled {
   letter-spacing: 1.2px;
 }
 
+/* Draggable process groups: only the grip handle is grabbable, so the sliders
+   and enable checkbox inside the group keep working. */
+.drag-handle {
+  display: inline-block;
+  margin-right: 8px;
+  color: var(--faint);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+.plugin-group.dragging {
+  opacity: 0.4;
+}
+
+.plugin-group.drag-over {
+  box-shadow: inset 0 2px 0 0 var(--accent, currentColor);
+}
+
 /* === CONTROLS (sliders / toggles / selects) === */
 
 .control-group {
@@ -432,13 +455,15 @@ input[type="range"]::-moz-range-thumb {
   gap: 20px;
 }
 
-.overlay-control {
+.overlay-control,
+.scale-control {
   display: flex;
   align-items: center;
   gap: 11px;
 }
 
-.overlay-control[hidden] {
+.overlay-control[hidden],
+.scale-control[hidden] {
   display: none;
 }
 
@@ -516,6 +541,13 @@ input[type="range"]::-moz-range-thumb {
 .svg-frame > svg {
   background: var(--panel);
   border-radius: 12px;
+}
+
+/* The Vector view scales the SVG down to preview small render sizes. The factor
+   is set on the container so it survives the SVG being re-rendered each trace. */
+.vector-solo svg {
+  max-width: calc(88% * var(--preview-scale, 1));
+  max-height: calc(100% * var(--preview-scale, 1));
 }
 
 .vector-solo {
