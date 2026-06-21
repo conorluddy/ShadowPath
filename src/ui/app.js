@@ -39,6 +39,8 @@ function initializeApp() {
   const overlayCanvas = document.querySelector("#overlayCanvas");
   const overlayContext = overlayCanvas.getContext("2d");
   const overlayVector = document.querySelector("#overlayVector");
+  const scaleRange = document.querySelector("#scaleRange");
+  const scaleValue = document.querySelector("#scaleValue");
 
   function selectView(view) {
     previewStage.dataset.view = view;
@@ -59,6 +61,16 @@ function initializeApp() {
     overlayValue.textContent = `${overlayRange.value}%`;
   });
   overlayCanvas.style.opacity = String(Number(overlayRange.value) / 100);
+
+  // Output-scale: previews the traced SVG at smaller sizes across every view.
+  // The factor lives on the preview stage (an ancestor of all output SVGs), so a
+  // single variable scales them all and it survives each trace re-render.
+  function applyOutputScale() {
+    previewStage.style.setProperty("--output-scale", String(Number(scaleRange.value) / 100));
+    scaleValue.textContent = `${scaleRange.value}%`;
+  }
+  scaleRange.addEventListener("input", applyOutputScale);
+  applyOutputScale();
 
   let imageLoaded = false;
   let latestOutput = null;

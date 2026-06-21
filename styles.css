@@ -432,13 +432,15 @@ input[type="range"]::-moz-range-thumb {
   gap: 20px;
 }
 
-.overlay-control {
+.overlay-control,
+.scale-control {
   display: flex;
   align-items: center;
   gap: 11px;
 }
 
-.overlay-control[hidden] {
+.overlay-control[hidden],
+.scale-control[hidden] {
   display: none;
 }
 
@@ -516,6 +518,19 @@ input[type="range"]::-moz-range-thumb {
 .svg-frame > svg {
   background: var(--panel);
   border-radius: 12px;
+}
+
+/* The output-scale control previews the traced SVG at smaller render sizes. It
+   scales only the output (the SVG) in every view — the source PNG and the
+   overlay's source canvas stay full size as a reference. A transform keeps it
+   uniform across the three views despite their different sizing rules, and
+   survives the SVG being re-rendered on each trace (the factor lives on the
+   preview stage, an ancestor). */
+.svg-frame > svg,
+.vector-solo svg,
+.overlay-vector svg {
+  transform: scale(var(--output-scale, 1));
+  transform-origin: center;
 }
 
 .vector-solo {
