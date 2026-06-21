@@ -17,7 +17,12 @@ It runs entirely in the browser: drop in an image, adjust the trace controls, th
 
 ## Use It
 
-Open `index.html` in any modern browser.
+The app is built from native ES modules, so serve it over HTTP rather than
+opening the file directly (browsers block module imports on `file://`).
+
+```text
+npx serve .
+```
 
 For GitHub Pages, publish the repo from the `main` branch root and visit:
 
@@ -27,21 +32,72 @@ https://conorluddy.github.io/ShadowPath/
 
 ## Local Development
 
-No install is required. The app is plain HTML, CSS, and JavaScript.
+No build step and no runtime dependencies. The app is plain HTML, CSS, and
+JavaScript ES modules.
 
 ```text
 index.html
 styles.css
-tracer.js
+src/
+  core/        pipeline runner, plugin registry, IR type contract
+  geometry/    pure contour math
+  plugins/     each tracing stage as a plugin (mask / trace / process / export)
+  ui/          schema-driven controls and app wiring
+  shadowpath.js  entry: registers built-ins, exposes the public API
+test/          Node behavior tests
 ```
+
+Testing is a first-class concern: every module and plugin is tested
+independently with no test dependencies. Run the specs with Node:
+
+```text
+npm test            # run once
+npm run test:watch  # TDD loop
+npm run test:coverage
+```
+
+See [TESTING.md](TESTING.md) for the spec-driven workflow and how to add a
+plugin test-first.
+
+## Architecture
+
+ShadowPath is a small **pipeline of plugins**. Each stage transforms one shape
+of the shared data contract (the "IR") into the next:
+
+```text
+ImageData  ->  Mask  ->  Contours  ->  Contours  ->  SVG
+            mask       trace        process[]      export
+```
+
+Plugins register themselves with the registry and declare their own parameters,
+which the control panel renders automatically — adding a feature means writing a
+plugin, not editing the core or the HTML. Implementations can later be swapped
+(for example a WASM-backed plugin) behind the same stage interface.
+
+## Contributing
+
+A few principles keep ShadowPath easy to grow. See [CLAUDE.md](CLAUDE.md) for the
+full working guide and [TESTING.md](TESTING.md) for the testing workflow.
+
+- **Stay static, no build, zero dependencies.** No backend, no bundler, no npm
+  runtime or test dependencies.
+- **A new feature is a new plugin.** Write a plugin and register it in
+  `src/shadowpath.js`; do not edit the pipeline core or `index.html` to add one.
+- **Plugins are pure and speak only the IR.** Shared math lives in
+  `src/geometry/`; keep DOM logic in `src/ui/` and pure logic in its own module.
+- **Declare params, never hardcode controls.** The control panel renders from
+  each plugin's param specs.
+- **Test first.** Every module and plugin is tested independently with edge-case
+  coverage; new plugins start from the plugin contract.
 
 ## How It Works
 
 1. Draw the image to a canvas.
-2. Convert pixels to a binary mask with the threshold slider.
-3. Trace the exposed edges of filled pixels into closed contours.
-4. Remove collinear points, optionally simplify and smooth the contours.
-5. Emit a single SVG path with `fill-rule="evenodd"` so holes remain transparent.
+2. **Mask** — convert pixels to a binary mask with the threshold slider.
+3. **Trace** — follow the exposed edges of filled pixels into closed contours.
+4. **Process** — remove collinear points, optionally simplify and smooth.
+5. **Export** — emit a single SVG path with `fill-rule="evenodd"` so holes
+   remain transparent.
 
 ## Notes
 

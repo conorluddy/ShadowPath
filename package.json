@@ -1,0 +1,12 @@
+{
+  "name": "shadowpath",
+  "version": "0.0.1",
+  "description": "Browser tool that traces high-contrast images into SVG paths.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "test:watch": "node --test --watch",
+    "test:coverage": "node --test --experimental-test-coverage"
+  }
+}

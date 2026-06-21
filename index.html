@@ -44,32 +44,7 @@
               <span id="fileLabel">Drop image or browse</span>
             </label>
 
-            <div class="control-group">
-              <label for="threshold">Threshold <output id="thresholdValue" for="threshold">150</output></label>
-              <input id="threshold" type="range" min="0" max="255" value="150">
-            </div>
-
-            <div class="control-group">
-              <label for="simplify">Simplify <output id="simplifyValue" for="simplify">1.0</output></label>
-              <input id="simplify" type="range" min="0" max="8" value="1" step="0.25">
-            </div>
-
-            <div class="control-group">
-              <label for="smooth">Smooth <output id="smoothValue" for="smooth">1</output></label>
-              <input id="smooth" type="range" min="0" max="3" value="1" step="1">
-            </div>
-
-            <fieldset class="toggle-list">
-              <legend>Shape</legend>
-              <label>
-                <input id="invert" type="checkbox">
-                <span>Trace light areas</span>
-              </label>
-              <label>
-                <input id="transparentBg" type="checkbox" checked>
-                <span>Ignore transparent pixels</span>
-              </label>
-            </fieldset>
+            <div class="plugin-controls" id="pluginControls"></div>
 
             <div class="stats" id="stats" aria-live="polite">
               <span>No image loaded</span>
@@ -96,6 +71,6 @@
       </section>
     </main>
 
-    <script src="tracer.js"></script>
+    <script type="module" src="src/ui/app.js"></script>
   </body>
 </html>
