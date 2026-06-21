@@ -72,6 +72,52 @@ function initializeApp() {
   scaleRange.addEventListener("input", applyOutputScale);
   applyOutputScale();
 
+  // Overlay alignment: drag the output SVG to register it against the source
+  // canvas beneath. The offset is applied as a translate on #overlayVector;
+  // double-click resets it. Offset is in CSS pixels of the preview, reset on
+  // each new image.
+  let overlayOffsetX = 0;
+  let overlayOffsetY = 0;
+  let overlayDragStart = null;
+
+  function applyOverlayOffset() {
+    overlayVector.style.setProperty("--overlay-x", `${overlayOffsetX}px`);
+    overlayVector.style.setProperty("--overlay-y", `${overlayOffsetY}px`);
+  }
+
+  function resetOverlayOffset() {
+    overlayOffsetX = 0;
+    overlayOffsetY = 0;
+    applyOverlayOffset();
+  }
+
+  overlayVector.addEventListener("pointerdown", (event) => {
+    overlayDragStart = { x: event.clientX, y: event.clientY, offsetX: overlayOffsetX, offsetY: overlayOffsetY };
+    overlayVector.classList.add("dragging");
+    overlayVector.setPointerCapture(event.pointerId);
+  });
+
+  overlayVector.addEventListener("pointermove", (event) => {
+    if (!overlayDragStart) {
+      return;
+    }
+    overlayOffsetX = overlayDragStart.offsetX + (event.clientX - overlayDragStart.x);
+    overlayOffsetY = overlayDragStart.offsetY + (event.clientY - overlayDragStart.y);
+    applyOverlayOffset();
+  });
+
+  function endOverlayDrag(event) {
+    if (!overlayDragStart) {
+      return;
+    }
+    overlayDragStart = null;
+    overlayVector.classList.remove("dragging");
+    overlayVector.releasePointerCapture(event.pointerId);
+  }
+  overlayVector.addEventListener("pointerup", endOverlayDrag);
+  overlayVector.addEventListener("pointercancel", endOverlayDrag);
+  overlayVector.addEventListener("dblclick", resetOverlayOffset);
+
   let imageLoaded = false;
   let latestOutput = null;
   let latestObjectUrl = "";
@@ -91,6 +137,7 @@ function initializeApp() {
     copyButton.disabled = true;
     downloadButton.disabled = true;
     latestOutput = null;
+    resetOverlayOffset();
   }
 
   function scheduleTrace() {
