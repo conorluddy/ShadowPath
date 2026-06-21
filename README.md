@@ -74,6 +74,22 @@ which the control panel renders automatically — adding a feature means writing
 plugin, not editing the core or the HTML. Implementations can later be swapped
 (for example a WASM-backed plugin) behind the same stage interface.
 
+## Contributing
+
+A few principles keep ShadowPath easy to grow. See [CLAUDE.md](CLAUDE.md) for the
+full working guide and [TESTING.md](TESTING.md) for the testing workflow.
+
+- **Stay static, no build, zero dependencies.** No backend, no bundler, no npm
+  runtime or test dependencies.
+- **A new feature is a new plugin.** Write a plugin and register it in
+  `src/shadowpath.js`; do not edit the pipeline core or `index.html` to add one.
+- **Plugins are pure and speak only the IR.** Shared math lives in
+  `src/geometry/`; keep DOM logic in `src/ui/` and pure logic in its own module.
+- **Declare params, never hardcode controls.** The control panel renders from
+  each plugin's param specs.
+- **Test first.** Every module and plugin is tested independently with edge-case
+  coverage; new plugins start from the plugin contract.
+
 ## How It Works
 
 1. Draw the image to a canvas.
