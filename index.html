@@ -4,36 +4,45 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>ShadowPath</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;450;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
   </head>
   <body>
     <main class="app-shell">
       <section class="workbench" aria-label="ShadowPath SVG tracer">
         <header class="topbar">
-          <div>
+          <div class="brand">
+            <svg class="logo" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M4 18 C 8 6, 16 6, 20 18"></path>
+              <circle cx="4" cy="18" r="1.7" fill="currentColor" stroke="none"></circle>
+              <circle cx="20" cy="18" r="1.7" fill="currentColor" stroke="none"></circle>
+            </svg>
             <h1>ShadowPath</h1>
-            <p>Convert high-contrast PNGs into clean SVG paths.</p>
+            <span class="tagline">png → svg tracer</span>
           </div>
           <div class="actions">
-            <button class="icon-button" id="copyButton" type="button" title="Copy SVG" aria-label="Copy SVG" disabled>
+            <button class="text-button" id="copyButton" type="button" title="Copy SVG" aria-label="Copy SVG" disabled>
               <svg aria-hidden="true" viewBox="0 0 24 24">
                 <rect x="8" y="8" width="11" height="11" rx="2"></rect>
                 <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
               </svg>
+              Copy SVG
             </button>
-            <button class="primary-button" id="downloadButton" type="button" disabled>
+            <button class="text-button accent" id="downloadButton" type="button" disabled>
               <svg aria-hidden="true" viewBox="0 0 24 24">
                 <path d="M12 3v12"></path>
                 <path d="m7 10 5 5 5-5"></path>
                 <path d="M5 21h14"></path>
               </svg>
-              Download SVG
+              Download .svg
             </button>
           </div>
         </header>
 
         <div class="workspace">
-          <aside class="controls" aria-label="Tracing controls">
+          <aside class="controls sp-scroll" aria-label="Tracing controls">
             <label class="dropzone" id="dropzone">
               <input id="fileInput" type="file" accept="image/png,image/jpeg,image/webp,image/gif">
               <svg aria-hidden="true" viewBox="0 0 24 24">
@@ -52,20 +61,62 @@
           </aside>
 
           <section class="preview-panel" aria-label="Preview">
-            <div class="preview-grid">
-              <div class="preview-frame">
-                <canvas id="sourceCanvas" aria-label="Original image preview"></canvas>
-                <span class="preview-label">Source</span>
+            <div class="view-toolbar" role="tablist" aria-label="Preview view">
+              <div class="view-tabs">
+                <button class="view-tab is-active" type="button" data-view="split" role="tab" aria-selected="true">Side by side</button>
+                <button class="view-tab" type="button" data-view="overlay" role="tab" aria-selected="false">Overlay</button>
+                <button class="view-tab" type="button" data-view="vector" role="tab" aria-selected="false">Vector</button>
+                <button class="view-tab" type="button" data-view="code" role="tab" aria-selected="false">Code</button>
               </div>
-              <div class="preview-frame svg-frame" id="svgPreview" aria-label="SVG preview">
-                <span class="empty-state">SVG preview</span>
-                <span class="preview-label">Vector</span>
+              <div class="view-meta">
+                <label class="overlay-control" id="overlayControl" hidden>
+                  <span class="overlay-label">overlay</span>
+                  <input class="overlay-range" id="overlayRange" type="range" min="0" max="100" value="55">
+                  <span class="overlay-value" id="overlayValue">55%</span>
+                </label>
               </div>
             </div>
-            <label class="code-panel">
-              <span>SVG Markup</span>
-              <textarea id="svgOutput" spellcheck="false" readonly></textarea>
-            </label>
+
+            <div class="preview-stage" id="previewStage" data-view="split">
+              <!-- split -->
+              <div class="preview-view view-split">
+                <div class="preview-frame">
+                  <span class="preview-label">Source <em>PNG</em></span>
+                  <canvas id="sourceCanvas" aria-label="Original image preview"></canvas>
+                </div>
+                <div class="preview-frame svg-frame" id="svgPreview" aria-label="SVG preview">
+                  <span class="preview-label accent">Vector <em>SVG</em></span>
+                  <span class="empty-state">SVG preview</span>
+                </div>
+              </div>
+
+              <!-- overlay -->
+              <div class="preview-view view-overlay">
+                <div class="preview-frame overlay-frame">
+                  <span class="preview-label">Overlay</span>
+                  <div class="overlay-stack" id="overlayStack">
+                    <canvas id="overlayCanvas" aria-hidden="true"></canvas>
+                    <div class="overlay-vector" id="overlayVector"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- vector -->
+              <div class="preview-view view-vector">
+                <div class="preview-frame svg-frame">
+                  <span class="preview-label accent">Vector <em>SVG</em></span>
+                  <div class="vector-solo" id="vectorSolo"></div>
+                </div>
+              </div>
+
+              <!-- code -->
+              <div class="preview-view view-code">
+                <label class="code-panel">
+                  <span>output.svg</span>
+                  <textarea id="svgOutput" class="sp-scroll" spellcheck="false" readonly></textarea>
+                </label>
+              </div>
+            </div>
           </section>
         </div>
       </section>

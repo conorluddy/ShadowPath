@@ -29,6 +29,37 @@ function initializeApp() {
   const downloadButton = document.querySelector("#downloadButton");
   const context = sourceCanvas.getContext("2d", { willReadFrequently: true });
 
+  // Tabbed preview: one stage, four views switched via a data-view attribute.
+  const previewStage = document.querySelector("#previewStage");
+  const viewTabs = document.querySelectorAll(".view-tab");
+  const vectorSolo = document.querySelector("#vectorSolo");
+  const overlayControl = document.querySelector("#overlayControl");
+  const overlayRange = document.querySelector("#overlayRange");
+  const overlayValue = document.querySelector("#overlayValue");
+  const overlayCanvas = document.querySelector("#overlayCanvas");
+  const overlayContext = overlayCanvas.getContext("2d");
+  const overlayVector = document.querySelector("#overlayVector");
+
+  function selectView(view) {
+    previewStage.dataset.view = view;
+    overlayControl.hidden = view !== "overlay";
+    for (const tab of viewTabs) {
+      const active = tab.dataset.view === view;
+      tab.classList.toggle("is-active", active);
+      tab.setAttribute("aria-selected", String(active));
+    }
+  }
+
+  for (const tab of viewTabs) {
+    tab.addEventListener("click", () => selectView(tab.dataset.view));
+  }
+
+  overlayRange.addEventListener("input", () => {
+    overlayCanvas.style.opacity = String(Number(overlayRange.value) / 100);
+    overlayValue.textContent = `${overlayRange.value}%`;
+  });
+  overlayCanvas.style.opacity = String(Number(overlayRange.value) / 100);
+
   let imageLoaded = false;
   let latestOutput = null;
   let latestObjectUrl = "";
@@ -39,7 +70,11 @@ function initializeApp() {
 
   function clearVector() {
     svgPreview.innerHTML =
-      '<span class="empty-state">SVG preview</span><span class="preview-label">Vector</span>';
+      '<span class="preview-label accent">Vector <em>SVG</em></span>' +
+      '<span class="empty-state">SVG preview</span>';
+    vectorSolo.innerHTML = "";
+    overlayVector.innerHTML = "";
+    overlayContext.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
     svgOutput.value = "";
     copyButton.disabled = true;
     downloadButton.disabled = true;
@@ -63,7 +98,14 @@ function initializeApp() {
     const { output, contours, pointCount } = runPipeline(imageData, config, registry, values);
     latestOutput = output;
 
-    svgPreview.innerHTML = `${output.text}<span class="preview-label">Vector</span>`;
+    // Feed every view from the same trace output.
+    const labelledSvg = `<span class="preview-label accent">Vector <em>SVG</em></span>${output.text}`;
+    svgPreview.innerHTML = labelledSvg;
+    vectorSolo.innerHTML = output.text;
+    overlayVector.innerHTML = output.text;
+    overlayCanvas.width = sourceCanvas.width;
+    overlayCanvas.height = sourceCanvas.height;
+    overlayContext.drawImage(sourceCanvas, 0, 0);
     svgOutput.value = output.text;
     const hasPaths = contours.paths.length > 0;
     copyButton.disabled = !hasPaths;
