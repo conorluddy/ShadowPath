@@ -17,7 +17,12 @@ It runs entirely in the browser: drop in an image, adjust the trace controls, th
 
 ## Use It
 
-Open `index.html` in any modern browser.
+The app is built from native ES modules, so serve it over HTTP rather than
+opening the file directly (browsers block module imports on `file://`).
+
+```text
+npx serve .
+```
 
 For GitHub Pages, publish the repo from the `main` branch root and visit:
 
@@ -27,21 +32,50 @@ https://conorluddy.github.io/ShadowPath/
 
 ## Local Development
 
-No install is required. The app is plain HTML, CSS, and JavaScript.
+No build step and no runtime dependencies. The app is plain HTML, CSS, and
+JavaScript ES modules.
 
 ```text
 index.html
 styles.css
-tracer.js
+src/
+  core/        pipeline runner, plugin registry, IR type contract
+  geometry/    pure contour math
+  plugins/     each tracing stage as a plugin (mask / trace / process / export)
+  ui/          schema-driven controls and app wiring
+  shadowpath.js  entry: registers built-ins, exposes the public API
+test/          Node behavior tests
 ```
+
+Run the tests with Node (no dependencies to install):
+
+```text
+npm test
+```
+
+## Architecture
+
+ShadowPath is a small **pipeline of plugins**. Each stage transforms one shape
+of the shared data contract (the "IR") into the next:
+
+```text
+ImageData  ->  Mask  ->  Contours  ->  Contours  ->  SVG
+            mask       trace        process[]      export
+```
+
+Plugins register themselves with the registry and declare their own parameters,
+which the control panel renders automatically — adding a feature means writing a
+plugin, not editing the core or the HTML. Implementations can later be swapped
+(for example a WASM-backed plugin) behind the same stage interface.
 
 ## How It Works
 
 1. Draw the image to a canvas.
-2. Convert pixels to a binary mask with the threshold slider.
-3. Trace the exposed edges of filled pixels into closed contours.
-4. Remove collinear points, optionally simplify and smooth the contours.
-5. Emit a single SVG path with `fill-rule="evenodd"` so holes remain transparent.
+2. **Mask** — convert pixels to a binary mask with the threshold slider.
+3. **Trace** — follow the exposed edges of filled pixels into closed contours.
+4. **Process** — remove collinear points, optionally simplify and smooth.
+5. **Export** — emit a single SVG path with `fill-rule="evenodd"` so holes
+   remain transparent.
 
 ## Notes
 

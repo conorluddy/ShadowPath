@@ -256,6 +256,44 @@ input[type="range"] {
   accent-color: var(--accent);
 }
 
+.plugin-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.plugin-group {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.plugin-group legend {
+  padding: 0;
+  margin-bottom: 2px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 760;
+  text-transform: uppercase;
+}
+
+.toggle {
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--ink);
+  font-size: 0.92rem;
+}
+
+.toggle input {
+  inline-size: 17px;
+  block-size: 17px;
+  accent-color: var(--accent);
+}
+
 .stats {
   margin-top: auto;
   min-height: 54px;
