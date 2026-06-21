@@ -73,6 +73,19 @@ test("the process chain keeps its declared order regardless of toggles", () => {
   assert.deepEqual(config.process.map((s) => s.id), ["simplify", "smooth"]);
 });
 
+test("defaultPipelineState seeds the process order from the declared options", () => {
+  const state = defaultPipelineState(PIPELINE_DEFINITION);
+  assert.deepEqual(state.process.order, PIPELINE_DEFINITION.process.options);
+});
+
+test("reordering the state order reorders the resolved chain", () => {
+  const state = defaultPipelineState(PIPELINE_DEFINITION);
+  state.process.order = ["smooth", "simplify", "grid-snap", "staircase", "chamfer", "pixel-jitter"];
+  state.process.enabled["grid-snap"] = true;
+  const config = resolveConfig(PIPELINE_DEFINITION, state);
+  assert.deepEqual(config.process.map((s) => s.id), ["smooth", "simplify", "grid-snap"]);
+});
+
 test("selecting a different exporter changes the export stage", () => {
   const state = defaultPipelineState(PIPELINE_DEFINITION);
   state.export.selected = "svg-curve";

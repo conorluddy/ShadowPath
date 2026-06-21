@@ -259,6 +259,26 @@ button:disabled {
   letter-spacing: 1.2px;
 }
 
+/* Draggable process groups: a grab affordance plus drag/drop feedback. */
+.plugin-group.draggable {
+  cursor: grab;
+}
+
+.plugin-group.draggable legend::before {
+  content: "⠿";
+  margin-right: 8px;
+  color: var(--faint);
+  cursor: grab;
+}
+
+.plugin-group.dragging {
+  opacity: 0.4;
+}
+
+.plugin-group.drag-over {
+  box-shadow: inset 0 2px 0 0 var(--accent, currentColor);
+}
+
 /* === CONTROLS (sliders / toggles / selects) === */
 
 .control-group {

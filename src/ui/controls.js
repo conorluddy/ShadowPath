@@ -10,6 +10,7 @@
 
 import { defaultParams } from "../shadowpath.js";
 import { formatParamValue } from "./format.js";
+import { moveItem } from "./reorder.js";
 import { STAGE_KINDS } from "../core/types.js";
 
 const STAGE_TITLES = { mask: "Mask", trace: "Trace", process: "Process", export: "Export" };
@@ -24,8 +25,12 @@ const STAGE_TITLES = { mask: "Mask", trace: "Trace", process: "Process", export:
  * @param {() => void} opts.onChange Called after any change.
  */
 export function renderControls(container, { registry, definition, state, values, onChange }) {
-  // Structural changes (toggles, selection) rebuild the panel; param tweaks do
-  // not, so dragging a slider never loses focus.
+  // The index of the process group currently being dragged, held across a single
+  // drag gesture (dragstart -> drop) within one render pass.
+  let dragIndex = null;
+
+  // Structural changes (toggles, selection, reorder) rebuild the panel; param
+  // tweaks do not, so dragging a slider never loses focus.
   function update() {
     render();
     onChange();
@@ -36,9 +41,10 @@ export function renderControls(container, { registry, definition, state, values,
     for (const kind of STAGE_KINDS) {
       const stage = definition[kind];
       if (stage.mode === "toggle") {
-        for (const id of stage.options) {
-          container.appendChild(toggleGroup(kind, registry.get(kind, id)));
-        }
+        const order = state[kind].order ?? stage.options;
+        order.forEach((id, index) => {
+          container.appendChild(toggleGroup(kind, registry.get(kind, id), index));
+        });
       } else {
         appendSingleStage(kind, stage);
       }
@@ -61,9 +67,10 @@ export function renderControls(container, { registry, definition, state, values,
     container.appendChild(group);
   }
 
-  function toggleGroup(kind, plugin) {
+  function toggleGroup(kind, plugin, index) {
     const enabled = state[kind].enabled[plugin.id] !== false;
     const group = makeGroup(plugin.label);
+    makeReorderable(group, kind, index);
 
     const legend = group.querySelector("legend");
     legend.textContent = "";
@@ -84,6 +91,41 @@ export function renderControls(container, { registry, definition, state, values,
 
     appendParams(group, plugin, !enabled);
     return group;
+  }
+
+  // Native HTML5 drag-and-drop so a process group can be dragged to a new slot
+  // in the chain. On drop we reorder state[kind].order and re-render; the runner
+  // picks up the new order on the next trace.
+  function makeReorderable(group, kind, index) {
+    group.draggable = true;
+    group.classList.add("draggable");
+
+    group.addEventListener("dragstart", (event) => {
+      dragIndex = index;
+      group.classList.add("dragging");
+      event.dataTransfer.effectAllowed = "move";
+    });
+    group.addEventListener("dragend", () => {
+      group.classList.remove("dragging");
+    });
+    group.addEventListener("dragover", (event) => {
+      event.preventDefault();
+      event.dataTransfer.dropEffect = "move";
+      group.classList.add("drag-over");
+    });
+    group.addEventListener("dragleave", () => {
+      group.classList.remove("drag-over");
+    });
+    group.addEventListener("drop", (event) => {
+      event.preventDefault();
+      group.classList.remove("drag-over");
+      if (dragIndex === null || dragIndex === index) {
+        return;
+      }
+      state[kind].order = moveItem(state[kind].order, dragIndex, index);
+      dragIndex = null;
+      update();
+    });
   }
 
   function selector(kind, stage) {
