@@ -111,9 +111,49 @@ export function renderControls(container, { registry, definition, state, values,
       values[plugin.id] = defaultParams(plugin);
     }
     for (const spec of plugin.params ?? []) {
-      const build = spec.type === "boolean" ? buildBoolean : buildRange;
+      const build = builderFor(spec.type);
       group.appendChild(build(plugin.id, spec, disabled));
     }
+  }
+
+  function builderFor(type) {
+    if (type === "boolean") return buildBoolean;
+    if (type === "select") return buildSelect;
+    return buildRange;
+  }
+
+  function buildSelect(pluginId, spec, disabled) {
+    const wrap = document.createElement("div");
+    wrap.className = "control-group";
+
+    const id = `ctl-${pluginId}-${spec.name}`;
+    const current = values[pluginId][spec.name] ?? spec.default;
+
+    const label = document.createElement("label");
+    label.htmlFor = id;
+    const text = document.createElement("span");
+    text.textContent = spec.label;
+    label.appendChild(text);
+
+    const select = document.createElement("select");
+    select.className = "plugin-select";
+    select.id = id;
+    select.disabled = disabled;
+    for (const option of spec.options) {
+      const el = document.createElement("option");
+      el.value = option.value;
+      el.textContent = option.label;
+      el.selected = option.value === current;
+      select.appendChild(el);
+    }
+
+    select.addEventListener("change", () => {
+      values[pluginId][spec.name] = select.value;
+      onChange();
+    });
+
+    wrap.append(label, select);
+    return wrap;
   }
 
   function buildRange(pluginId, spec, disabled) {

@@ -27,9 +27,20 @@ test("describes itself with kind, mime, and filename", () => {
   assert.equal(out.filename, "shadowpath.svg");
 });
 
-test("sizes the viewBox to the source dimensions", () => {
+test("defaults to a full-image viewBox sized to the source dimensions", () => {
   const out = run(contourSet([square], 64, 48));
   assert.match(out.text, /viewBox="0 0 64 48"/);
+});
+
+test("crop mode with padding tightens and outsets the viewBox", () => {
+  const out = run(contourSet([square], 64, 48), { canvas: "crop", padding: 3 });
+  assert.match(out.text, /viewBox="-3 -3 16 16"/);
+});
+
+test("an aspect-ratio preset frames the shape at the target ratio", () => {
+  const wide = [[0, 0], [10, 0], [10, 2], [0, 2]]; // 10x2, centred at (5,1)
+  const out = run(contourSet([wide], 64, 48), { canvas: "1:1" });
+  assert.match(out.text, /viewBox="0 -4 10 10"/);
 });
 
 test("emits a single even-odd path built from cubic curves", () => {

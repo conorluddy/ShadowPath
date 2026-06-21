@@ -6,7 +6,7 @@
 import assert from "node:assert/strict";
 
 const VALID_KINDS = new Set(["mask", "trace", "process", "export"]);
-const VALID_PARAM_TYPES = new Set(["range", "boolean"]);
+const VALID_PARAM_TYPES = new Set(["range", "boolean", "select"]);
 
 /**
  * Assert that a plugin descriptor is well formed. Throws (via assert) on the
@@ -68,5 +68,18 @@ function assertParamSpec(spec) {
 
   if (spec.type === "boolean") {
     assert.equal(typeof spec.default, "boolean", `boolean ${spec.name} default must be a boolean`);
+  }
+
+  if (spec.type === "select") {
+    assert.ok(Array.isArray(spec.options), `select ${spec.name} needs an options array`);
+    assert.ok(spec.options.length > 0, `select ${spec.name} needs at least one option`);
+    for (const option of spec.options) {
+      assert.equal(typeof option.value, "string", `select ${spec.name} option value must be a string`);
+      assert.equal(typeof option.label, "string", `select ${spec.name} option label must be a string`);
+    }
+    assert.ok(
+      spec.options.some((option) => option.value === spec.default),
+      `select ${spec.name} default must match an option value`
+    );
   }
 }

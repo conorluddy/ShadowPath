@@ -3,9 +3,19 @@
 // than the straight-line exporter; holes are preserved via fill-rule="evenodd".
 
 import { catmullRomToBezier } from "../../geometry/curve.js";
+import { computeViewBox } from "../../geometry/viewport.js";
+import { CANVAS_PARAMS } from "./canvas-params.js";
 
 function roundCoord(value) {
   return Number(value.toFixed(2)).toString();
+}
+
+function viewBoxAttr(contours, params) {
+  const { x, y, width, height } = computeViewBox(contours, {
+    mode: params.canvas,
+    padding: params.padding
+  });
+  return [x, y, width, height].map(roundCoord).join(" ");
 }
 
 const xy = (point) => `${roundCoord(point[0])} ${roundCoord(point[1])}`;
@@ -30,10 +40,11 @@ export const svgCurve = {
   label: "SVG Curves",
   description: "Smooth cubic-Bézier path through the contour points.",
   params: [
-    { name: "tension", label: "Tension", type: "range", min: 0, max: 1.5, step: 0.05, default: 1 }
+    { name: "tension", label: "Tension", type: "range", min: 0, max: 1.5, step: 0.05, default: 1 },
+    ...CANVAS_PARAMS
   ],
   run(contours, params) {
-    const { paths, width, height } = contours;
+    const { paths } = contours;
     const tension = Number(params.tension);
     const d = paths
       .map((path) => contourToD(path, tension))
@@ -41,7 +52,7 @@ export const svgCurve = {
       .join(" ");
 
     const text = [
-      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" role="img">`,
+      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBoxAttr(contours, params)}" role="img">`,
       `  <path d="${d}" fill="#000" fill-rule="evenodd"/>`,
       "</svg>"
     ].join("\n");
