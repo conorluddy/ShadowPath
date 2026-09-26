@@ -41,6 +41,60 @@ function initializeApp() {
   const overlayVector = document.querySelector("#overlayVector");
   const scaleRange = document.querySelector("#scaleRange");
   const scaleValue = document.querySelector("#scaleValue");
+  const backgroundColor = document.querySelector("#backgroundColor");
+  const backgroundValue = document.querySelector("#backgroundValue");
+  const backgroundPresets = document.querySelectorAll("[data-background]");
+  const foregroundColor = document.querySelector("#foregroundColor");
+  const exportForeground = document.querySelector("#exportForeground");
+  let traceOutput = null;
+  let latestOutput = null;
+
+  function applyForegroundColor() {
+    if (!traceOutput) return;
+    const template = document.createElement("template");
+    template.innerHTML = traceOutput.text;
+    for (const path of template.content.querySelectorAll("svg path")) {
+      path.setAttribute("fill", foregroundColor.value);
+    }
+    const previewText = template.innerHTML;
+    latestOutput = exportForeground.checked ? { ...traceOutput, text: previewText } : traceOutput;
+    svgPreview.innerHTML = `<span class="preview-label accent">Vector <em>SVG</em></span>${previewText}`;
+    vectorSolo.innerHTML = previewText;
+    overlayVector.innerHTML = previewText;
+    svgOutput.value = latestOutput.text;
+  }
+
+  foregroundColor.addEventListener("change", applyForegroundColor);
+  exportForeground.addEventListener("change", applyForegroundColor);
+
+  // Keep the background on the preview container, outside the pipeline and SVG.
+  function applyBackgroundColor() {
+    const color = backgroundColor.value;
+    previewStage.style.setProperty("--preview-background", color);
+    backgroundValue.value = color;
+    for (const preset of backgroundPresets) {
+      preset.setAttribute("aria-pressed", String(preset.dataset.background === color));
+    }
+    if (color !== "#808080") {
+      // Choose black or white for contrast, including custom background colours.
+      const channels = color.slice(1).match(/../g).map((hex) => {
+        const channel = parseInt(hex, 16) / 255;
+        return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+      });
+      const luminance = channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722;
+      foregroundColor.value = luminance > 0.179 ? "#000000" : "#ffffff";
+    }
+    applyForegroundColor();
+  }
+
+  backgroundColor.addEventListener("input", applyBackgroundColor);
+  for (const preset of backgroundPresets) {
+    preset.addEventListener("click", () => {
+      backgroundColor.value = preset.dataset.background;
+      applyBackgroundColor();
+    });
+  }
+  applyBackgroundColor();
 
   function selectView(view) {
     previewStage.dataset.view = view;
@@ -119,7 +173,6 @@ function initializeApp() {
   overlayVector.addEventListener("dblclick", resetOverlayOffset);
 
   let imageLoaded = false;
-  let latestOutput = null;
   let latestObjectUrl = "";
   let scheduled = false;
 
@@ -136,6 +189,7 @@ function initializeApp() {
     svgOutput.value = "";
     copyButton.disabled = true;
     downloadButton.disabled = true;
+    traceOutput = null;
     latestOutput = null;
     resetOverlayOffset();
   }
@@ -155,17 +209,13 @@ function initializeApp() {
     const imageData = context.getImageData(0, 0, sourceCanvas.width, sourceCanvas.height);
     const config = resolveConfig(definition, state);
     const { output, contours, pointCount } = runPipeline(imageData, config, registry, values);
-    latestOutput = output;
+    traceOutput = output;
 
-    // Feed every view from the same trace output.
-    const labelledSvg = `<span class="preview-label accent">Vector <em>SVG</em></span>${output.text}`;
-    svgPreview.innerHTML = labelledSvg;
-    vectorSolo.innerHTML = output.text;
-    overlayVector.innerHTML = output.text;
+    // Colour every preview; the export checkbox controls the code, copy and download.
+    applyForegroundColor();
     overlayCanvas.width = sourceCanvas.width;
     overlayCanvas.height = sourceCanvas.height;
     overlayContext.drawImage(sourceCanvas, 0, 0);
-    svgOutput.value = output.text;
     const hasPaths = contours.paths.length > 0;
     copyButton.disabled = !hasPaths;
     downloadButton.disabled = !hasPaths;

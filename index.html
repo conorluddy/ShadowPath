@@ -53,6 +53,36 @@
               <span id="fileLabel">Drop image or browse</span>
             </label>
 
+            <fieldset class="plugin-group background-controls">
+              <legend>Preview</legend>
+              <div class="control-group">
+                <label for="backgroundColor">
+                  <span>Canvas background</span>
+                  <output id="backgroundValue" for="backgroundColor">#ffffff</output>
+                </label>
+                <input id="backgroundColor" type="color" value="#ffffff" aria-describedby="backgroundHint">
+                <div class="background-presets" role="group" aria-label="Canvas background presets">
+                  <button type="button" data-background="#000000" aria-pressed="false" style="--swatch: #000000">Black</button>
+                  <button type="button" data-background="#ffffff" aria-pressed="true" style="--swatch: #ffffff">White</button>
+                  <button type="button" data-background="#808080" aria-pressed="false" style="--swatch: #808080">Grey</button>
+                </div>
+                <p class="control-hint" id="backgroundHint">Preview only. Not included in the SVG.</p>
+              </div>
+              <div class="control-group">
+                <label for="foregroundColor">Foreground colour</label>
+                <select class="plugin-select" id="foregroundColor">
+                  <option value="#000000">Black</option>
+                  <option value="#ffffff">White</option>
+                </select>
+                <p class="control-hint">Defaults to contrast with the background; grey keeps your last choice.</p>
+              </div>
+              <label class="toggle">
+                <input id="exportForeground" type="checkbox" aria-describedby="exportForegroundHint">
+                <span>Include foreground colour in SVG</span>
+              </label>
+              <p class="control-hint" id="exportForegroundHint">When off, copied and downloaded SVGs use black.</p>
+            </fieldset>
+
             <div class="plugin-controls" id="pluginControls"></div>
 
             <div class="stats" id="stats" aria-live="polite">

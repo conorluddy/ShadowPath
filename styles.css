@@ -369,6 +369,60 @@ input[type="range"]::-moz-range-thumb {
   opacity: 0.5;
 }
 
+/* === PREVIEW BACKGROUND CONTROLS === */
+
+.background-controls input[type="color"] {
+  width: 100%;
+  height: 34px;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel);
+  cursor: pointer;
+}
+
+.background-presets {
+  display: flex;
+  gap: 6px;
+}
+
+.background-presets button {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 32px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
+.background-presets button::before {
+  content: "";
+  width: 12px;
+  height: 12px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--swatch);
+}
+
+.background-presets button[aria-pressed="true"] {
+  border-color: var(--accent-ink);
+  box-shadow: inset 0 0 0 1px var(--accent-ink);
+}
+
+.control-hint {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
 /* === STATS === */
 
 .stats {
@@ -514,10 +568,10 @@ input[type="range"]::-moz-range-thumb {
   filter: var(--shadow);
 }
 
-.svg-frame .vector-solo svg,
-.svg-frame > svg {
-  background: var(--panel);
-  border-radius: 12px;
+.svg-frame,
+.overlay-frame {
+  background: var(--preview-background, #ffffff);
+  background-clip: content-box;
 }
 
 /* The output-scale control previews the traced SVG at smaller render sizes. It
